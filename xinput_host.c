@@ -261,8 +261,17 @@ bool xinputh_open(uint8_t rhport, uint8_t dev_addr, tusb_desc_interface_t const 
     TU_VERIFY(dev_addr <= CFG_TUH_DEVICE_MAX);
 
     xinput_type_t type = XINPUT_UNKNOWN;
+
+    uint16_t vid, pid;
+    tuh_vid_pid_get(dev_addr, &vid, &pid);
+
     if (desc_itf->bNumEndpoints < 2)
         type = XINPUT_UNKNOWN;
+    else if (vid == 0x3537 &&  //GameSir Tegenaria Lite vid
+            (pid == 0x1093 ||  //Tegenaria Lite xinput mode pid
+             pid == 0x1094) && //Tegenaria Lite hid mode pid
+             desc_itf->bInterfaceNumber == 1) //Interface MI_01
+        type = TEGENARIA;
     else if (desc_itf->bInterfaceSubClass == 0x5D && //Xbox360 wireless bInterfaceSubClass
              desc_itf->bInterfaceProtocol == 0x81)   //Xbox360 wireless bInterfaceProtocol
         type = XBOX360_WIRELESS;
@@ -383,7 +392,23 @@ bool xinputh_xfer_cb(uint8_t dev_addr, uint8_t ep_addr, xfer_result_t result, ui
     if (dir == TUSB_DIR_IN)
     {
         TU_LOG2("Get Report callback (%u, %u, %u bytes)\r\n", dev_addr, instance, xferred_bytes);
-        if (xid_itf->type == XBOX360_WIRED)
+        if (xid_itf->type == TEGENARIA)
+        {
+            if (rdata[0] == 0x10 && rdata[1] == 0x14)
+            {
+                tu_memclr(pad, sizeof(xinput_gamepad_t));
+                pad->wButtons = rdata[2] | (rdata[3] << 8);
+                pad->bLeftTrigger  = rdata[4];
+                pad->bRightTrigger = rdata[5];
+                pad->sThumbLX = rdata[7] << 8 | rdata[6];
+                pad->sThumbLY = rdata[9] << 8 | rdata[8];
+                pad->sThumbRX = rdata[11] << 8 | rdata[10];
+                pad->sThumbRY = rdata[13] << 8 | rdata[12];
+                pad->bVendorButtons = rdata[14];
+                xid_itf->new_pad_data = true;
+            }
+        }
+        else if (xid_itf->type == XBOX360_WIRED)
         {
             #define GET_USHORT(a) (uint16_t)((a)[1] << 8 | (a)[0])
             #define GET_SHORT(a) ((int16_t)GET_USHORT(a))

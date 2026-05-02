@@ -42,6 +42,12 @@
 #define XINPUT_GAMEPAD_Y 0x8000
 #define MAX_PACKET_SIZE 32
 
+//Vendor-defined hid device buttons
+#define TEGENARIA_GAMEPAD_MODE     0x01
+#define TEGENARIA_GAMEPAD_CAPTURE  0x02
+#define TEGENARIA_GAMEPAD_PADDLE_L 0x04
+#define TEGENARIA_GAMEPAD_PADDLE_R 0x08
+
 typedef struct xinput_gamepad
 {
     uint16_t wButtons;
@@ -51,6 +57,7 @@ typedef struct xinput_gamepad
     int16_t sThumbLY;
     int16_t sThumbRX;
     int16_t sThumbRY;
+    uint8_t bVendorButtons;
 } xinput_gamepad_t;
 
 typedef enum
@@ -59,8 +66,21 @@ typedef enum
     XBOXONE,
     XBOX360_WIRELESS,
     XBOX360_WIRED,
-    XBOXOG
+    XBOXOG,
+    TEGENARIA
 } xinput_type_t;
+
+static inline const char *xinput_type_to_str(xinput_type_t type)
+{
+    switch (type) {
+        case XBOXONE:          return "XBOXONE";
+        case XBOX360_WIRELESS: return "XBOX360_WIRELESS";
+        case XBOX360_WIRED:    return "XBOX360_WIRED";
+        case XBOXOG:           return "XBOXOG";
+        case TEGENARIA:        return "TEGENARIA";
+        default:               return "UNKNOWN";
+    }
+}
 
 typedef struct
 {
