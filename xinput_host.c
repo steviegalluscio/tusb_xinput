@@ -265,25 +265,26 @@ bool xinputh_open(uint8_t rhport, uint8_t dev_addr, tusb_desc_interface_t const 
     uint16_t vid, pid;
     tuh_vid_pid_get(dev_addr, &vid, &pid);
 
-    if (desc_itf->bNumEndpoints < 2)
+    if (desc_itf->bNumEndpoints < 2) {
         type = XINPUT_UNKNOWN;
-    else if (vid == 0x3537 &&  //GameSir Tegenaria Lite vid
-            (pid == 0x1093 ||  //Tegenaria Lite xinput mode pid
-             pid == 0x1094) && //Tegenaria Lite hid mode pid
-             desc_itf->bInterfaceNumber == 1) //Interface MI_01
-        type = TEGENARIA;
-    else if (desc_itf->bInterfaceSubClass == 0x5D && //Xbox360 wireless bInterfaceSubClass
-             desc_itf->bInterfaceProtocol == 0x81)   //Xbox360 wireless bInterfaceProtocol
+    } else if (vid == 0x3537 &&                        //GameSir Tegenaria Lite VID
+              (pid == 0x1093 || pid == 0x1094)) {      //Tegenaria Lite XInput & HID mode PID
+        if (desc_itf->bInterfaceNumber == 1) {         //Tegenaria interface MI_01
+            type = TEGENARIA;
+        }
+    } else if (desc_itf->bInterfaceSubClass == 0x5D && //Xbox360 wireless bInterfaceSubClass
+               desc_itf->bInterfaceProtocol == 0x81) { //Xbox360 wireless bInterfaceProtocol
         type = XBOX360_WIRELESS;
-    else if (desc_itf->bInterfaceSubClass == 0x5D && //Xbox360 wired bInterfaceSubClass
-             desc_itf->bInterfaceProtocol == 0x01)   //Xbox360 wired bInterfaceProtocol
+    } else if (desc_itf->bInterfaceSubClass == 0x5D && //Xbox360 wired bInterfaceSubClass
+               desc_itf->bInterfaceProtocol == 0x01) { //Xbox360 wired bInterfaceProtocol
         type = XBOX360_WIRED;
-    else if (desc_itf->bInterfaceSubClass == 0x47 && //Xbone and SX bInterfaceSubClass
-             desc_itf->bInterfaceProtocol == 0xD0)   //Xbone and SX bInterfaceProtocol
+    } else if (desc_itf->bInterfaceSubClass == 0x47 && //Xbone and SX bInterfaceSubClass
+               desc_itf->bInterfaceProtocol == 0xD0) { //Xbone and SX bInterfaceProtocol
         type = XBOXONE;
-    else if (desc_itf->bInterfaceClass == 0x58 &&  //XboxOG bInterfaceClass
-             desc_itf->bInterfaceSubClass == 0x42) //XboxOG bInterfaceSubClass
+    } else if (desc_itf->bInterfaceClass == 0x58 &&    //XboxOG bInterfaceClass
+               desc_itf->bInterfaceSubClass == 0x42) { //XboxOG bInterfaceSubClass
         type = XBOXOG;
+    }
 
     if (type == XINPUT_UNKNOWN)
     {
