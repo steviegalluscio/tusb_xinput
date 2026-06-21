@@ -268,10 +268,9 @@ bool xinputh_open(uint8_t rhport, uint8_t dev_addr, tusb_desc_interface_t const 
     if (desc_itf->bNumEndpoints < 2) {
         type = XINPUT_UNKNOWN;
     } else if (vid == 0x3537 &&                        //GameSir Tegenaria Lite VID
-              (pid == 0x1093 || pid == 0x1094)) {      //Tegenaria Lite XInput & HID mode PID
-        if (desc_itf->bInterfaceNumber == 1) {         //Tegenaria interface MI_01
-            type = TEGENARIA;
-        }
+              (pid == 0x1093 || pid == 0x1094) &&      //Tegenaria Lite XInput & HID mode PID
+              desc_itf->bInterfaceNumber == 1) {       //Tegenaria vendor interface MI_01
+        type = TEGENARIA;
     } else if (desc_itf->bInterfaceSubClass == 0x5D && //Xbox360 wireless bInterfaceSubClass
                desc_itf->bInterfaceProtocol == 0x81) { //Xbox360 wireless bInterfaceProtocol
         type = XBOX360_WIRELESS;
